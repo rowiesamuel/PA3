@@ -1,38 +1,44 @@
 from typing import Union
 import numpy as np
 import pandas as pd
+import h5py
 
 
 def gen_path_for_multi_speeds(
     run_id: int, index: list[str], pump_speeds: list[float]
 ) -> list[str]:
-    pass
+    temp = ""
+    path_list=[]
+    for i in index :
+        for p in pump_speeds:
+            temp = '/run'+str(run_id)+'/Kennlinie_ESP_c_'+str(p)+"_"+str(i)+"/"
+            path_list.append(temp)
 
+    return path_list
 
 def read_dataframe_metadata(
     file: str, path: str, att_key: str
 ) -> Union[np.float64, np.int32, np.bytes_, None]:
-    pass
-
+   
 
 def read_group_metadata(
     file: str, path: str, att_key: str
 ) -> Union[np.float64, np.int32, np.bytes_, None]:
-    pass
+    
+   
 
 
 def get_df(file: str, path: str) -> pd.DataFrame:
-    pass
+   
 
 
 def check_col_signum(df: pd.DataFrame, col: str, threshold: int) -> None:
-    pass
 
 
 def check_number_of_measurements(
     df: pd.DataFrame, col: str, f: float, t: float
 ) -> None:
-    pass
+   
 
 
 def gen_plotdata(
