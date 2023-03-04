@@ -19,12 +19,20 @@ def gen_path_for_multi_speeds(
 def read_dataframe_metadata(
     file: str, path: str, att_key: str
 ) -> Union[np.float64, np.int32, np.bytes_, None]:
-   
+    hdf = pd.HDFStore(file,mode ='r')
+    df = hdf.get(path)
+
+
+    try:
+        return df[att_key]._metadata[0].encode('utf-8')
+    except KeyError:
+        print("fehler aufgetreten")
 
 def read_group_metadata(
     file: str, path: str, att_key: str
 ) -> Union[np.float64, np.int32, np.bytes_, None]:
-    
+    with h5py.File(file,"r") as f:
+        return f[path].attrs[att_key]
    
 
 
