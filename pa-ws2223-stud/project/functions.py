@@ -37,15 +37,26 @@ def read_group_metadata(
 
 
 def get_df(file: str, path: str) -> pd.DataFrame:
-   
+   hdf = pd.HDFStore(file, mode='r')
+    df = hdf.get(path)
+    return df
 
 
 def check_col_signum(df: pd.DataFrame, col: str, threshold: int) -> None:
+ if (df[col] >= threshold).any():
+        return True
+    else:
+        raise ValueError("Value does not meet criterion 1.")
 
 
 def check_number_of_measurements(
     df: pd.DataFrame, col: str, f: float, t: float
 ) -> None:
+ if(len(df[col] == f*t)):
+        return True
+    else:
+        raise ValueError("Value does not meet criterion 2.")
+
    
 
 
