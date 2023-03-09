@@ -20,7 +20,7 @@ def read_dataframe_metadata(
     file: str, path: str, att_key: str
 ) -> Union[np.float64, np.int32, np.bytes_, None]:
     hdf = pd.HDFStore(file,mode ='r')
-    df = hdf.get(path)
+    df = hdf.get_storer(path)
 
 
     try:
@@ -38,12 +38,12 @@ def read_group_metadata(
 
 def get_df(file: str, path: str) -> pd.DataFrame:
    hdf = pd.HDFStore(file, mode='r')
-    df = hdf.get(path)
-    return df
+   df = hdf.get(path)
+   return df
 
 
 def check_col_signum(df: pd.DataFrame, col: str, threshold: int) -> None:
- if (df[col] >= threshold).any():
+    if (df[col] >= threshold).any():
         return True
     else:
         raise ValueError("Value does not meet criterion 1.")
@@ -52,7 +52,7 @@ def check_col_signum(df: pd.DataFrame, col: str, threshold: int) -> None:
 def check_number_of_measurements(
     df: pd.DataFrame, col: str, f: float, t: float
 ) -> None:
- if(len(df[col] == f*t)):
+    if(len(df[col] == f*t)):
         return True
     else:
         raise ValueError("Value does not meet criterion 2.")
@@ -66,31 +66,56 @@ def gen_plotdata(
     cols: list,
     output_size: tuple,
 ) -> np.ndarray:
-    pass
+    
+
+    att_1 = "cyan_dp_unsicherheitsintervall"
+    att_2 = "cyan_q_unsicherheitsintervall"
+
+    final_list = []
+    path_list_length = len(path_list)
+
+    for i in range(path_list_length)
+        df = get_df(file_path, path_list[i])
+
+        dp_speed_mean = get_average_value(df, cols[0])
+        dp_metadata = read_dataframe_metadata(file_path, path_list[i], att_1)
+        dp_normal_std = std_uniform_to_normal(dp_metadata)
+        dp_std = total_uncertainty(dp_metadata, dp_normal_std)
+
+        q_speed_mean = get_average_value(df, cols[1])
+        q_metadata = read_dataframe_metadata(file_path, path_list[i], att_2)
+        q_normal_std = std_uniform_to_normal(q_metadata)
+        q_std = total_uncertainty(q_metadata, q_normal_std)
+
+    final = np.reshape(final_list, output_size)
+
+    return final
+
+        
 
 
 def get_average_value(df: pd.DataFrame, col: str) -> float:
-    pass
+    return df[col].mean()
 
 
 def get_std_deviation(df: pd.DataFrame, col: str) -> float:
-    pass
+    return df[col].std()
 
 
 def std_uniform_to_normal(std_uniform: float) -> float:
-    pass
+    return std_uniform / math.sqrt(3)
 
 
 def total_uncertainty(stat: float, sys: float) -> float:
-    pass
+    return math.sqrt((stat * stat) + (sys * sys))
 
 
 def convert_bar_to_pa(v: pd.Series) -> pd.Series:
-    pass
+    return v * 100000
 
 
 def convert_lpm_to_qmps(v: pd.Series) -> pd.Series:
-    pass
+    return v * ((5/3) * 0.0001)
 
 
 def dataframe_dedimension(
