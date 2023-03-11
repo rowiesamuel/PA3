@@ -2,6 +2,7 @@ from typing import Union
 import numpy as np
 import pandas as pd
 import h5py
+import math
 
 
 def gen_path_for_multi_speeds(
@@ -11,7 +12,7 @@ def gen_path_for_multi_speeds(
     path_list=[]
     for i in index :
         for p in pump_speeds:
-            temp = '/run'+str(run_id)+'/Kennlinie_ESP_c_'+str(p)+"_"+str(i)+"/"
+            temp = '/run' + str(run_id)+'/Kennlinie_ESP_c_'+str(p)+"_"+str(i)+"/"
             path_list.append(temp)
 
     return path_list
@@ -74,7 +75,7 @@ def gen_plotdata(
     final_list = []
     path_list_length = len(path_list)
 
-    for i in range(path_list_length)
+    for i in range(path_list_length):
         df = get_df(file_path, path_list[i])
 
         dp_speed_mean = get_average_value(df, cols[0])
@@ -86,6 +87,11 @@ def gen_plotdata(
         q_metadata = read_dataframe_metadata(file_path, path_list[i], att_2)
         q_normal_std = std_uniform_to_normal(q_metadata)
         q_std = total_uncertainty(q_metadata, q_normal_std)
+
+        final_list.append(dp_speed_mean)
+        final_list.append(dp_std)
+        final_list.append(q_speed_mean)
+        final_list.append(q_std)
 
     final = np.reshape(final_list, output_size)
 
@@ -115,7 +121,7 @@ def convert_bar_to_pa(v: pd.Series) -> pd.Series:
 
 
 def convert_lpm_to_qmps(v: pd.Series) -> pd.Series:
-    return v * ((5/3) * 0.0001)
+    return v * ((5/3) * 0.00001)
 
 
 def dataframe_dedimension(
@@ -123,11 +129,15 @@ def dataframe_dedimension(
     pump_speeds: list,
     metadata: dict,
 ) -> pd.DataFrame:
-    pass
+    plot_data_copy = plot_data.copy()
+
+    plot_data = pd.DataFrame (plot_data, columns = ['psi_<1260>', 'psi_<1260>_uncertainty', 'phi_<1260>', 'phi_<1260>_uncertainty', 'psi_<540>', 'psi_<540>_uncertainty', 'phi_<540>', 'phi_<540>_uncertainty', 'psi_<780>', 'psi_<780>_uncertainty', 'phi_<780>', 'phi_<780>_uncertainty'])
+    
+    
 
 
 def convert_rpm_to_hz(v: float) -> float:
-    pass
+    return v / 60
 
 
 def calc_pressure_number(
@@ -136,11 +146,11 @@ def calc_pressure_number(
     d: float,
     rho: float,
 ) -> float:
-    pass
+    return (2 * delta_p)/((n * n)*(d * d) * rho) 
 
 
 def calc_flow_number(q: float, n: float, d: float) -> float:
-    pass
+    return (4 * q) / (np.pi * np.pi * n * d * d * d)
 
 
 def uncertainty_pressure_number(
@@ -154,7 +164,7 @@ def uncertainty_pressure_number(
     d: float,
     psi: float,
 ) -> float:
-    pass
+    return psi * math.sqrt((total_uncertainty_p / p)**2 + (total_uncertainty_rho / rho)**2 + ((2 * total_uncertainty_n / n)**2) + (2 * total_uncertainty_d / d)**2)
 
 
 def uncertainty_flow_number(
@@ -166,7 +176,7 @@ def uncertainty_flow_number(
     d: float,
     phi: float,
 ) -> float:
-    pass
+    return phi * math.sqrt((total_uncertainty_q / q)**2 + (total_uncertainty_n / n)**2 + (3 * total_uncertainty_d / d)**2)
 
 
 def main():
