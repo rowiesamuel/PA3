@@ -129,7 +129,6 @@ def dataframe_dedimension(
     pump_speeds: list,
     metadata: dict,
 ) -> pd.DataFrame:
-    plot_data_copy = plot_data.copy()
 
     pump_speed_hz = []
     for rpm in pump_speeds:
@@ -159,8 +158,8 @@ def dataframe_dedimension(
         third_delta_p = plot_data_copy['dp_780_mean'].iloc[i]
         second_delta_p = plot_data_copy['dp_540_mean'].iloc[i]
         first_n = pump_speed_hz[0] #arrange according to speed (assumption 1260)
-        third_n = pump_speed_hz[1] #arrange according to speed (assumption 780) --switch with third_n
-        second_n = pump_speed_hz[2] #arrange according to speed (assumption 540)
+        third_n = pump_speed_hz[1] #arrange according to speed (assumption 540)
+        second_n = pump_speed_hz[2] #arrange according to speed (assumption 780)
         d = metadata.get('cyan_pumpe_char_laenge')
         rho = metadata.get('foerdermedium_dichte')
 
@@ -168,9 +167,9 @@ def dataframe_dedimension(
         psi_780 = calc_pressure_number(second_delta_p, second_n, d, rho)
         psi_540 = calc_pressure_number(third_delta_p, third_n, d, rho)
 
-        first_q = plot_data_copy['dp_1260_mean'].iloc[i]
-        second_q = plot_data_copy['dp_540_mean'].iloc[i]
-        third_q = plot_data_copy['dp_780_mean'].iloc[i]
+        first_q = plot_data_copy['q_1260_mean'].iloc[i]
+        second_q = plot_data_copy['q_540_mean'].iloc[i]
+        third_q = plot_data_copy['q_780_mean'].iloc[i]
 
 
 
@@ -189,17 +188,17 @@ def dataframe_dedimension(
         psi_1260_uncertainty = uncertainty_pressure_number(first_total_uncertainty_p, first_delta_p, total_uncertainty_rho, rho, total_uncertainty_n, first_n, total_uncertainty_d,
                                                         d, psi_1260)
         psi_540_uncertainty = uncertainty_pressure_number(second_total_uncertainty_p, second_delta_p, total_uncertainty_rho, rho, total_uncertainty_n, second_n, total_uncertainty_d,
-                                                        d, psi_1260)
+                                                        d, psi_540)
         psi_780_uncertainty = uncertainty_pressure_number(third_total_uncertainty_p, third_delta_p, total_uncertainty_rho, rho, total_uncertainty_n, third_n, total_uncertainty_d,
-                                                        d, psi_1260)
+                                                        d, psi_780)
 
         first_total_uncertainty_q = plot_data_copy['q_1260_std'].iloc[i]
         second_total_uncertainty_q = plot_data_copy['q_540_std'].iloc[i]
         third_total_uncertainty_q = plot_data_copy['q_780_std'].iloc[1]
 
-        phi_1260_uncertainty = uncertainty_flow_number(first_total_uncertainty_q, q, total_uncertainty_n, first_n, total_uncertainty_d, d, phi_1260)
-        phi_540_uncertainty = uncertainty_flow_number(second_total_uncertainty_q, q, total_uncertainty_n, second_n, total_uncertainty_d, d, phi_1260)
-        phi_780_uncertainty = uncertainty_flow_number(third_total_uncertainty_q, q, total_uncertainty_n, third_n, total_uncertainty_d, d, phi_1260)
+        phi_1260_uncertainty = uncertainty_flow_number(first_total_uncertainty_q, first_q, total_uncertainty_n, first_n, total_uncertainty_d, d, phi_1260)
+        phi_540_uncertainty = uncertainty_flow_number(second_total_uncertainty_q, second_q, total_uncertainty_n, second_n, total_uncertainty_d, d, phi_540)
+        phi_780_uncertainty = uncertainty_flow_number(third_total_uncertainty_q, third_q, total_uncertainty_n, third_n, total_uncertainty_d, d, phi_780)
 
         temp_list = []
         temp_list.append(psi_1260, psi_1260_uncertainty, phi_1260, phi_1260_uncertainty, psi_780, psi_780_uncertainty, phi_780, phi_780_uncertainty, psi_540, psi_540_uncertainty, phi_540, phi_540_uncertainty)
