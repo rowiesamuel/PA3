@@ -131,9 +131,92 @@ def dataframe_dedimension(
 ) -> pd.DataFrame:
     plot_data_copy = plot_data.copy()
 
-    plot_data = pd.DataFrame (plot_data, columns = ['psi_<1260>', 'psi_<1260>_uncertainty', 'phi_<1260>', 'phi_<1260>_uncertainty', 'psi_<540>', 'psi_<540>_uncertainty', 'phi_<540>', 'phi_<540>_uncertainty', 'psi_<780>', 'psi_<780>_uncertainty', 'phi_<780>', 'phi_<780>_uncertainty'])
+    pump_speed_hz = []
+    for rpm in pump_speeds:
+        new_pump_speeds = convert_rpm_to_hz(rpm)
+        pump_speed_hz.append(new_pump_speeds) 
+
+    final = pd.DataFrame(columns=['psi_1260', 'psi_1260_uncertainty, phi_1260', 'phi_1260_uncertainty', 'psi_780', 'psi_780_uncertainty', 'phi_780', 'phi_780_uncertainty',
+                                        'psi_540', 'psi_540_uncertainty', 'phi_540', 'phi_540_uncertainty'])
+
+    plot_data_copy = plot_data.copy()
+
+    pump_speed_hz = []
+    for rpm in pump_speeds:
+        new_pump_speeds = convert_rpm_to_hz(rpm)
+        pump_speed_hz.append(new_pump_speeds)
+
+    #delta_p = dp_1260_mean
+    #n = pump_speeds (already hertz)
+    #d = metadata.cyan_pumpe_char_laenge
+    #rho = metadata.foerdermedium_dichte
+
+
+    #start loop here
+    for i in range(5):
+
+        first_delta_p = plot_data_copy['dp_1260_mean'].iloc[i]
+        third_delta_p = plot_data_copy['dp_780_mean'].iloc[i]
+        second_delta_p = plot_data_copy['dp_540_mean'].iloc[i]
+        first_n = pump_speed_hz[0] #arrange according to speed (assumption 1260)
+        third_n = pump_speed_hz[1] #arrange according to speed (assumption 780) --switch with third_n
+        second_n = pump_speed_hz[2] #arrange according to speed (assumption 540)
+        d = metadata.get('cyan_pumpe_char_laenge')
+        rho = metadata.get('foerdermedium_dichte')
+
+        psi_1260 = calc_pressure_number(first_delta_p, first_n, d, rho)
+        psi_780 = calc_pressure_number(second_delta_p, second_n, d, rho)
+        psi_540 = calc_pressure_number(third_delta_p, third_n, d, rho)
+
+        first_q = plot_data_copy['dp_1260_mean'].iloc[i]
+        second_q = plot_data_copy['dp_540_mean'].iloc[i]
+        third_q = plot_data_copy['dp_780_mean'].iloc[i]
+
+
+
+        phi_1260 = calc_flow_number(first_q, first_n, d)
+        phi_540 = calc_flow_number(second_q, second_n, d)
+        phi_780 = calc_flow_number(third_q, third_n, d)
+
+        first_total_uncertainty_p = plot_data_copy['dp_1260_std'].iloc[i]
+        second_total_uncertainty_p = plot_data_copy['dp_540_std'].iloc[i]
+        third_total_uncertainty_p = plot_data_copy['dp_780_std'].iloc[i]
+
+        total_uncertainty_rho = metadata.get('foerdermedium_dichte_unsicherheitsintervall')
+        total_uncertainty_n = metadata.get('cyan_pumpe_drehzahl_unsicherheitsintervall')
+        total_uncertainty_d = metadata.get('cyan_pumpe_char_laenge_unsicherheitsintervall')
+
+        psi_1260_uncertainty = uncertainty_pressure_number(first_total_uncertainty_p, first_delta_p, total_uncertainty_rho, rho, total_uncertainty_n, first_n, total_uncertainty_d,
+                                                        d, psi_1260)
+        psi_540_uncertainty = uncertainty_pressure_number(second_total_uncertainty_p, second_delta_p, total_uncertainty_rho, rho, total_uncertainty_n, second_n, total_uncertainty_d,
+                                                        d, psi_1260)
+        psi_780_uncertainty = uncertainty_pressure_number(third_total_uncertainty_p, third_delta_p, total_uncertainty_rho, rho, total_uncertainty_n, third_n, total_uncertainty_d,
+                                                        d, psi_1260)
+
+        first_total_uncertainty_q = plot_data_copy['q_1260_std'].iloc[i]
+        second_total_uncertainty_q = plot_data_copy['q_540_std'].iloc[i]
+        third_total_uncertainty_q = plot_data_copy['q_780_std'].iloc[1]
+
+        phi_1260_uncertainty = uncertainty_flow_number(first_total_uncertainty_q, q, total_uncertainty_n, first_n, total_uncertainty_d, d, phi_1260)
+        phi_540_uncertainty = uncertainty_flow_number(second_total_uncertainty_q, q, total_uncertainty_n, second_n, total_uncertainty_d, d, phi_1260)
+        phi_780_uncertainty = uncertainty_flow_number(third_total_uncertainty_q, q, total_uncertainty_n, third_n, total_uncertainty_d, d, phi_1260)
+
+        temp_list = []
+        temp_list.append(psi_1260, psi_1260_uncertainty, phi_1260, phi_1260_uncertainty, psi_780, psi_780_uncertainty, phi_780, phi_780_uncertainty, psi_540, psi_540_uncertainty, phi_540, phi_540_uncertainty)
+
+        final.loc[i] = temp_list
+
+
+    #end loop 
+
+    return final
+    
+
     
     
+
+    
+
 
 
 def convert_rpm_to_hz(v: float) -> float:
