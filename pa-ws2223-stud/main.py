@@ -100,6 +100,7 @@ new_df = pd.DataFrame(new_array, columns = ['dp_1260_mean', 'dp_1260_std', 'q_12
                                                 'dp_780_mean', 'dp_780_std', 'q_780_mean', 'q_780_std'])
 df_copy = new_df.copy()
 
+
 attribute_list = []
 value_list = []
 path = '/run1/'
@@ -110,6 +111,14 @@ with h5py.File(data_file, "r") as f:
             #print(f[path].attrs[a])
             value = functions.read_group_metadata(data_file, path, a)
             value_list.append(value)
+
+        #print(f[path].attrs)
+
+
+attribute_dict = {k:v for k,v in zip(attribute_list, value_list)}
+print(attribute_dict)
+
+functions.dataframe_dedimension(df_copy, pump_speeds, attribute_dict)
     
 
 
